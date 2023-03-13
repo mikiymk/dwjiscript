@@ -28,6 +28,7 @@ mod ast {
         Minus,
         Times,
         Divide,
+        Eof,
     }
 
     fn make_token_list(source: &str) -> Vec<Token> {
@@ -47,6 +48,9 @@ mod ast {
     }
 
     fn pop_token<'a>(tokens: &'a [Token]) -> (Token, &'a [Token]) {
+        if tokens.len() == 0 {
+            return (Token::Eof, tokens);
+        }
         let token = &tokens[0];
         let tokens = &tokens[1..];
         (*token, tokens)
@@ -78,11 +82,11 @@ mod ast {
     }
 
     fn parse_expression_time_div<'a>(tokens: &'a [Token]) -> (Ast, &'a [Token]) {
-        let (left, tokens) = parse_expression_plus_minus(tokens);
+        let (left, tokens) = parse_number(tokens);
         let (token, new_tokens) = pop_token(&tokens);
         match token {
             Token::Plus | Token::Minus => {
-                let (right, tokens) = parse_expression_plus_minus(new_tokens);
+                let (right, tokens) = parse_number(new_tokens);
                 (
                     Ast::ExpressionPlus {
                         left: Box::new(left),
@@ -92,6 +96,14 @@ mod ast {
                 )
             }
             _ => (left, &tokens),
+        }
+    }
+
+    fn parse_number<'a>(tokens: &'a [Token]) -> (Ast, &'a [Token]) {
+        let (token, new_tokens) = pop_token(&tokens);
+        match token {
+            Token::Number(n) => (Ast::Number(n), &new_tokens),
+            _ => (Ast::Number(0), &tokens),
         }
     }
 
