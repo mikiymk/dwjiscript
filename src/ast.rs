@@ -6,11 +6,11 @@ pub enum Ast {
     Number(u32),
 }
 
-pub fn make_ast(source: &str) -> Ast {
-    let tokens = token::make_token_list(source);
+pub fn make_ast(source: &str) -> Result<Ast, String> {
+    let tokens = token::make_token_list(source)?;
 
     let (ast, _) = parse_expression_plus_minus(&tokens);
-    ast
+    Ok(ast)
 }
 
 fn parse_expression_plus_minus<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token::Token]) {
@@ -52,7 +52,7 @@ fn parse_expression_time_div<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token
 fn parse_number<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token::Token]) {
     let (token, new_tokens) = token::pop_token(&tokens);
     match token {
-        token::Token::Number(n) => (Ast::Number(n), &new_tokens),
+        token::Token::Number(n) => (Ast::Number(n.parse().unwrap()), &new_tokens),
         _ => (Ast::Number(0), &tokens),
     }
 }
@@ -62,7 +62,7 @@ mod test {
     #[test]
     fn make_astは文字列からastを作成します() {
         let test_case = "3 + 2";
-        let ast = super::make_ast(test_case);
+        let ast = super::make_ast(test_case).unwrap();
         let expected = super::Ast::ExpressionPlus {
             left: Box::new(super::Ast::Number(3)),
             right: Box::new(super::Ast::Number(2)),

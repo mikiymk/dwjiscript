@@ -1,6 +1,9 @@
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+use std::iter::Peekable;
+use std::str::Chars;
+
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Token {
-    Number(u32),
+    Number(String),
     Plus,
     Minus,
     Times,
@@ -8,20 +11,51 @@ pub enum Token {
     Eof,
 }
 
-pub fn make_token_list(source: &str) -> Vec<Token> {
+pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
+    let mut chars = source.chars().peekable();
 
-    for c in source.chars() {
+    while let Some(c) = chars.peek() {
         match c {
-            '+' => tokens.push(Token::Plus),
-            '-' => tokens.push(Token::Minus),
-            '*' => tokens.push(Token::Times),
-            '/' => tokens.push(Token::Divide),
-            c => tokens.push(Token::Number(c.into())),
+            '+' => {
+                let _ = chars.next();
+                tokens.push(Token::Plus);
+            }
+            '-' => {
+                let _ = chars.next();
+                tokens.push(Token::Minus);
+            }
+            '*' => {
+                let _ = chars.next();
+                tokens.push(Token::Times);
+            }
+            '/' => {
+                let _ = chars.next();
+                tokens.push(Token::Divide);
+            }
+            '0'..='9' => tokens.push(tokenize_decimal_number(&mut chars)?),
+            ' ' | '\n' => {
+                let _ = chars.next();
+            }
+            c => return Err(format!("unknown character {}", c)),
         }
     }
 
-    tokens
+    Ok(tokens)
+}
+
+fn tokenize_decimal_number(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    let mut num_string = String::new();
+
+    while let Some(c) = chars.peek() {
+        if matches!(c, '0'..='9') {
+            let c = chars.next().ok_or("peeked char is changed")?;
+            num_string.push(c);
+        } else {
+            break;
+        }
+    }
+    Ok(Token::Number(num_string))
 }
 
 pub fn pop_token<'a>(tokens: &'a [Token]) -> (Token, &'a [Token]) {
@@ -30,7 +64,7 @@ pub fn pop_token<'a>(tokens: &'a [Token]) -> (Token, &'a [Token]) {
     }
     let token = &tokens[0];
     let tokens = &tokens[1..];
-    (*token, tokens)
+    (token.clone(), tokens)
 }
 
 #[cfg(test)]
@@ -42,17 +76,17 @@ mod test {
     fn 一つの数字と四則演算をtoken列にする() {
         let test_case = "1 + 2 * 4 - 6 / 3";
 
-        let result = make_token_list(test_case);
+        let result = make_token_list(test_case).unwrap();
         let expected = vec![
-            Token::Number(1),
+            Token::Number("1".to_string()),
             Token::Plus,
-            Token::Number(2),
+            Token::Number("2".to_string()),
             Token::Times,
-            Token::Number(4),
+            Token::Number("4".to_string()),
             Token::Minus,
-            Token::Number(6),
+            Token::Number("6".to_string()),
             Token::Divide,
-            Token::Number(3),
+            Token::Number("3".to_string()),
         ];
 
         assert_eq!(result, expected, r#"tokenize "1 + 2 * 4 - 6 / 3""#);
@@ -62,13 +96,13 @@ mod test {
     fn 二桁以上の数字を含む式をtoken列にする() {
         let test_case = "10 * 25 - 306";
 
-        let result = make_token_list(test_case);
+        let result = make_token_list(test_case).unwrap();
         let expected = vec![
-            Token::Number(10),
+            Token::Number("10".to_string()),
             Token::Times,
-            Token::Number(25),
+            Token::Number("25".to_string()),
             Token::Minus,
-            Token::Number(306),
+            Token::Number("306".to_string()),
         ];
 
         assert_eq!(result, expected, r#"tokenize "10 * 25 * 306""#);
