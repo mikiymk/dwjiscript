@@ -1,3 +1,5 @@
+//! プログラムの文字列からトークン列にするモジュールです。
+
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -11,6 +13,11 @@ pub enum Token {
     Eof,
 }
 
+/// 文字列を読み込んでトークン列を作成します。
+///
+/// ```
+/// make_token_list("1 + 2");
+/// ```
 pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
     let mut chars = source.chars().peekable();
@@ -35,6 +42,7 @@ pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
             }
             '0'..='9' => tokens.push(tokenize_decimal_number(&mut chars)?),
             ' ' | '\n' => {
+                // 空白文字
                 let _ = chars.next();
             }
             c => return Err(format!("unknown character {}", c)),
@@ -44,6 +52,7 @@ pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
     Ok(tokens)
 }
 
+/// 文字イテレータの先頭から数字が連続する間、読み込みます。
 fn tokenize_decimal_number(chars: &mut Peekable<Chars>) -> Result<Token, String> {
     let mut num_string = String::new();
 
@@ -52,12 +61,14 @@ fn tokenize_decimal_number(chars: &mut Peekable<Chars>) -> Result<Token, String>
             let c = chars.next().ok_or("peeked char is changed")?;
             num_string.push(c);
         } else {
+            // 数字ではない文字の場合
             break;
         }
     }
     Ok(Token::Number(num_string))
 }
 
+/// トークン列からトークンを１つ取り出します。
 pub fn pop_token<'a>(tokens: &'a [Token]) -> (Token, &'a [Token]) {
     if tokens.len() == 0 {
         return (Token::Eof, tokens);
