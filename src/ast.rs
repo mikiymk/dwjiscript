@@ -13,9 +13,9 @@ pub fn make_ast(source: &str) -> Result<Ast, String> {
     Ok(ast)
 }
 
-fn parse_expression_plus_minus<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token::Token]) {
+fn parse_expression_plus_minus(tokens: &[token::Token]) -> (Ast, &[token::Token]) {
     let (left, tokens) = parse_expression_time_div(tokens);
-    let (token, new_tokens) = token::pop_token(&tokens);
+    let (token, new_tokens) = token::pop_token(tokens);
     match token {
         token::Token::Plus | token::Token::Minus => {
             let (right, tokens) = parse_expression_time_div(new_tokens);
@@ -24,16 +24,16 @@ fn parse_expression_plus_minus<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [tok
                     left: Box::new(left),
                     right: Box::new(right),
                 },
-                &tokens,
+                tokens,
             )
         }
-        _ => (left, &tokens),
+        _ => (left, tokens),
     }
 }
 
-fn parse_expression_time_div<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token::Token]) {
+fn parse_expression_time_div(tokens: &[token::Token]) -> (Ast, &[token::Token]) {
     let (left, tokens) = parse_number(tokens);
-    let (token, new_tokens) = token::pop_token(&tokens);
+    let (token, new_tokens) = token::pop_token(tokens);
     match token {
         token::Token::Plus | token::Token::Minus => {
             let (right, tokens) = parse_number(new_tokens);
@@ -42,18 +42,18 @@ fn parse_expression_time_div<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token
                     left: Box::new(left),
                     right: Box::new(right),
                 },
-                &tokens,
+                tokens,
             )
         }
-        _ => (left, &tokens),
+        _ => (left, tokens),
     }
 }
 
-fn parse_number<'a>(tokens: &'a [token::Token]) -> (Ast, &'a [token::Token]) {
-    let (token, new_tokens) = token::pop_token(&tokens);
+fn parse_number(tokens: &[token::Token]) -> (Ast, &[token::Token]) {
+    let (token, new_tokens) = token::pop_token(tokens);
     match token {
-        token::Token::Number(n) => (Ast::Number(n.parse().unwrap()), &new_tokens),
-        _ => (Ast::Number(0), &tokens),
+        token::Token::Number(n) => (Ast::Number(n.parse().unwrap()), new_tokens),
+        _ => (Ast::Number(0), tokens),
     }
 }
 
