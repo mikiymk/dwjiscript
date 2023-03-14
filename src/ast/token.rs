@@ -10,6 +10,8 @@ pub enum Token {
     Minus,
     Times,
     Divide,
+    ParenStart,
+    ParenEnd,
     Eof,
 }
 
@@ -24,7 +26,7 @@ pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
 
     while let Some(c) = chars.peek() {
         match c {
-            '+' | '-' | '*' | '/' => tokens.push(tokenize_operator(&mut chars)?),
+            '+' | '-' | '*' | '/' | '(' | ')' => tokens.push(tokenize_operator(&mut chars)?),
             '0'..='9' => tokens.push(tokenize_decimal_number(&mut chars)?),
             ' ' | '\n' => {
                 // 空白文字
@@ -45,6 +47,8 @@ fn tokenize_operator(chars: &mut Peekable<Chars>) -> Result<Token, String> {
             '-' => Ok(Token::Minus),
             '*' => Ok(Token::Times),
             '/' => Ok(Token::Divide),
+            '(' => Ok(Token::ParenStart),
+            ')' => Ok(Token::ParenEnd),
             c => Err(format!("{} is not operator", c)),
         }
     } else {
@@ -114,6 +118,28 @@ mod test {
             Token::Number("25".to_string()),
             Token::Minus,
             Token::Number("306".to_string()),
+        ];
+
+        assert_eq!(result, expected, r#"tokenize "10 * 25 * 306""#);
+    }
+
+    #[test]
+    fn tokenize_number_and_operator_with_parens() {
+        let test_case = "((30) / (2 + 3))";
+
+        let result = make_token_list(test_case).unwrap();
+        let expected = vec![
+            Token::ParenStart,
+            Token::ParenStart,
+            Token::Number("30".to_string()),
+            Token::ParenEnd,
+            Token::Divide,
+            Token::ParenStart,
+            Token::Number("2".to_string()),
+            Token::Plus,
+            Token::Number("3".to_string()),
+            Token::ParenEnd,
+            Token::ParenEnd,
         ];
 
         assert_eq!(result, expected, r#"tokenize "10 * 25 * 306""#);
