@@ -6,12 +6,189 @@ use std::str::Chars;
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Token {
     Number(String),
+    Identifier(String),
+
+    // =
+    Assign,
+
+    // +
     Plus,
+
+    // -
     Minus,
-    Times,
+
+    // *
+    Multiple,
+
+    // **
+    Exponent,
+
+    // /
     Divide,
+
+    // %
+    Remainder,
+
+    // +=
+    PlusAssign,
+
+    // -=
+    MinusAssign,
+
+    // *=
+    MultipleAssign,
+
+    // **=
+    ExponentAssign,
+
+    // /=
+    DivideAssign,
+
+    // %=
+    RemainderAssign,
+
+    // ++
+    PlusPlus,
+
+    // --
+    MinusMinus,
+
+    // ~
+    BitNot,
+
+    // |
+    BitOr,
+
+    // &
+    BitAnd,
+
+    // ^
+    BitXor,
+
+    // |=
+    BitOrAssign,
+
+    // &=
+    BitAndAssign,
+
+    // ^=
+    BitXorAssign,
+
+    // <<
+    LeftShift,
+
+    // >>
+    RightShift,
+
+    // >>>
+    UnsignedRightShift,
+
+    // <<=
+    LeftShiftAssign,
+
+    // >>=
+    RightShiftAssign,
+
+    // >>>=
+    UnsignedRightShiftAssign,
+
+    // ==
+    Equal,
+
+    // !=
+    NotEqual,
+
+    // ===
+    StrictEqual,
+
+    // !==
+    StrictNotEqual,
+
+    // <
+    GreaterThan,
+
+    // <=
+    GreaterThanEqual,
+
+    // >
+    LessThan,
+
+    // >=
+    LessThanEqual,
+
+    // ||
+    Or,
+
+    // &&
+    And,
+
+    // !
+    Not,
+
+    // ||=
+    OrAssign,
+
+    // &&=
+    AndAssign,
+
+    // ?
+    Question,
+
+    // ??
+    QuestionQuestion,
+
+    // ?.
+    QuestionDot,
+
+    // (
     ParenStart,
+
+    // )
     ParenEnd,
+
+    // [
+    BracketStart,
+
+    // ]
+    BracketEnd,
+
+    // {
+    BraceStart,
+
+    // }
+    BraceEnd,
+
+    // .
+    Dot,
+
+    // ,
+    Comma,
+
+    // :
+    Colon,
+
+    // ;
+    Semicolon,
+
+    // ...
+    SpreadDots,
+
+    // '
+    SingleQuote,
+
+    // "
+    DoubleQuote,
+
+    // `
+    BackQuote,
+
+    // //
+    LineComment,
+
+    // /* */
+    BlockComment,
+
+    //
     Eof,
 }
 
@@ -45,7 +222,7 @@ fn tokenize_operator(chars: &mut Peekable<Chars>) -> Result<Token, String> {
         match c {
             '+' => Ok(Token::Plus),
             '-' => Ok(Token::Minus),
-            '*' => Ok(Token::Times),
+            '*' => Ok(Token::Multiple),
             '/' => Ok(Token::Divide),
             '(' => Ok(Token::ParenStart),
             ')' => Ok(Token::ParenEnd),
@@ -96,7 +273,7 @@ mod test {
             Token::Number("1".to_string()),
             Token::Plus,
             Token::Number("2".to_string()),
-            Token::Times,
+            Token::Multiple,
             Token::Number("4".to_string()),
             Token::Minus,
             Token::Number("6".to_string()),
@@ -114,7 +291,7 @@ mod test {
         let result = make_token_list(test_case).unwrap();
         let expected = vec![
             Token::Number("10".to_string()),
-            Token::Times,
+            Token::Multiple,
             Token::Number("25".to_string()),
             Token::Minus,
             Token::Number("306".to_string()),
