@@ -104,16 +104,16 @@ pub enum Token {
     // !==
     StrictNotEqual,
 
-    // <
+    // >
     GreaterThan,
 
-    // <=
+    // >=
     GreaterThanEqual,
 
-    // >
+    // <
     LessThan,
 
-    // >=
+    // <=
     LessThanEqual,
 
     // ||
@@ -136,6 +136,9 @@ pub enum Token {
 
     // ??
     QuestionQuestion,
+
+    // ??=
+    QuestionQuestionAssign,
 
     // ?.
     QuestionDot,
@@ -173,14 +176,17 @@ pub enum Token {
     // ...
     SpreadDots,
 
-    // '
-    SingleQuote,
+    // =>
+    Arrow,
 
-    // "
-    DoubleQuote,
+    // ''
+    SingleQuoteStringLiteral,
 
-    // `
-    BackQuote,
+    // ""
+    DoubleQuoteStringLiteral,
+
+    // ``
+    BackQuoteTemplateLiteral,
 
     // //
     LineComment,
@@ -203,7 +209,10 @@ pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
 
     while let Some(c) = chars.peek() {
         match c {
-            '+' | '-' | '*' | '/' | '(' | ')' => tokens.push(tokenize_operator(&mut chars)?),
+            '=' | '+' | '-' | '*' | '/' | '%' | '<' | '>' | '|' | '&' | '^' | '~' | '!' | '?'
+            | '.' | ',' | ':' | ';' | '\'' | '"' | '`' | '(' | ')' | '[' | ']' | '{' | '}' => {
+                tokens.push(tokenize_operator(&mut chars)?)
+            }
             '0'..='9' => tokens.push(tokenize_decimal_number(&mut chars)?),
             ' ' | '\n' => {
                 // 空白文字
@@ -220,12 +229,155 @@ pub fn make_token_list(source: &str) -> Result<Vec<Token>, String> {
 fn tokenize_operator(chars: &mut Peekable<Chars>) -> Result<Token, String> {
     if let Some(c) = chars.next() {
         match c {
-            '+' => Ok(Token::Plus),
-            '-' => Ok(Token::Minus),
-            '*' => Ok(Token::Multiple),
-            '/' => Ok(Token::Divide),
+            '+' => match chars.peek() {
+                Some('+') => tokenize_const_token(chars, Token::PlusPlus),
+                Some('=') => tokenize_const_token(chars, Token::PlusAssign),
+                _ => Ok(Token::Plus),
+            },
+            '-' => match chars.peek() {
+                Some('-') => tokenize_const_token(chars, Token::MinusMinus),
+                Some('=') => tokenize_const_token(chars, Token::MinusAssign),
+                _ => Ok(Token::Minus),
+            },
+            '*' => match chars.peek() {
+                Some('*') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::ExponentAssign),
+                        _ => Ok(Token::Exponent),
+                    }
+                }
+                Some('=') => tokenize_const_token(chars, Token::MultipleAssign),
+                _ => Ok(Token::Multiple),
+            },
+            '/' => match chars.peek() {
+                Some('*') => tokenize_block_comment(chars),
+                Some('/') => tokenize_line_comment(chars),
+                Some('=') => tokenize_const_token(chars, Token::DivideAssign),
+                _ => Ok(Token::Divide),
+            },
+            '%' => match chars.peek() {
+                Some('=') => tokenize_const_token(chars, Token::RemainderAssign),
+                _ => Ok(Token::Remainder),
+            },
+            '~' => Ok(Token::BitNot),
+            '&' => match chars.peek() {
+                Some('&') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::AndAssign),
+                        _ => Ok(Token::And),
+                    }
+                }
+                Some('=') => tokenize_const_token(chars, Token::BitAndAssign),
+                _ => Ok(Token::BitAnd),
+            },
+            '|' => match chars.peek() {
+                Some('|') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::OrAssign),
+                        _ => Ok(Token::Or),
+                    }
+                }
+                Some('=') => tokenize_const_token(chars, Token::BitOrAssign),
+                _ => Ok(Token::BitOr),
+            },
+            '^' => match chars.peek() {
+                Some('=') => tokenize_const_token(chars, Token::BitXorAssign),
+                _ => Ok(Token::BitXor),
+            },
+            '=' => match chars.peek() {
+                Some('=') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::StrictEqual),
+                        _ => Ok(Token::Equal),
+                    }
+                }
+                Some('>') => tokenize_const_token(chars, Token::Arrow),
+                _ => Ok(Token::Assign),
+            },
+            '!' => match chars.peek() {
+                Some('=') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::StrictNotEqual),
+                        _ => Ok(Token::NotEqual),
+                    }
+                }
+                _ => Ok(Token::Not),
+            },
+            '<' => match chars.peek() {
+                Some('<') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::LeftShiftAssign),
+                        _ => Ok(Token::LeftShift),
+                    }
+                }
+                Some('=') => tokenize_const_token(chars, Token::LessThanEqual),
+                _ => Ok(Token::LessThan),
+            },
+            '>' => match chars.peek() {
+                Some('>') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('>') => {
+                            chars.next();
+                            match chars.peek() {
+                                Some('=') => {
+                                    tokenize_const_token(chars, Token::UnsignedRightShiftAssign)
+                                }
+                                _ => Ok(Token::UnsignedRightShift),
+                            }
+                        }
+                        Some('=') => tokenize_const_token(chars, Token::RightShiftAssign),
+                        _ => Ok(Token::RightShift),
+                    }
+                }
+                Some('=') => tokenize_const_token(chars, Token::GreaterThanEqual),
+                _ => Ok(Token::GreaterThan),
+            },
+            '?' => {
+                chars.next();
+                match chars.peek() {
+                    Some('?') => {
+                        chars.next();
+                        match chars.peek() {
+                            Some('=') => tokenize_const_token(chars, Token::QuestionQuestionAssign),
+                            _ => Ok(Token::QuestionQuestion),
+                        }
+                    }
+                    Some('.') => tokenize_const_token(chars, Token::QuestionDot),
+                    _ => Ok(Token::Question),
+                }
+            }
             '(' => Ok(Token::ParenStart),
             ')' => Ok(Token::ParenEnd),
+            '[' => Ok(Token::BracketStart),
+            ']' => Ok(Token::BracketEnd),
+            '{' => Ok(Token::BraceStart),
+            '}' => Ok(Token::BraceEnd),
+            '.' => {
+                chars.next();
+                match chars.peek() {
+                    Some('.') => {
+                        chars.next();
+                        match chars.peek() {
+                            Some('.') => tokenize_const_token(chars, Token::SpreadDots),
+                            _ => Ok(Token::Dot),
+                        }
+                    }
+                    _ => Ok(Token::Dot),
+                }
+            }
+            ',' => Ok(Token::Comma),
+            ':' => Ok(Token::Colon),
+            ';' => Ok(Token::Semicolon),
+            '\'' => tokenize_single_quote_string_literal(chars),
+            '"' => tokenize_double_quote_string_literal(chars),
+            '`' => tokenize_back_quote_template_literal(chars),
             c => Err(format!("{} is not operator", c)),
         }
     } else {
@@ -249,6 +401,41 @@ fn tokenize_decimal_number(chars: &mut Peekable<Chars>) -> Result<Token, String>
     Ok(Token::Number(num_string))
 }
 
+fn tokenize_line_comment(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    let mut str = String::new();
+
+    todo!();
+
+    Ok(Token::LineComment)
+}
+
+fn tokenize_block_comment(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    let mut str = String::new();
+
+    todo!();
+
+    Ok(Token::BlockComment)
+}
+
+fn tokenize_single_quote_string_literal(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    todo!();
+}
+
+fn tokenize_double_quote_string_literal(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    todo!();
+}
+
+fn tokenize_back_quote_template_literal(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    todo!();
+}
+
+/// 文字イテレータを一つ進めて渡されたトークンをそのまま返します。
+/// ２操作を１つの式でするため
+fn tokenize_const_token(chars: &mut Peekable<Chars>, token: Token) -> Result<Token, String> {
+    chars.next().ok_or("next char expected, but reached end")?;
+    Ok(token)
+}
+
 /// トークン列からトークンを１つ取り出します。
 pub fn pop_token(tokens: &[Token]) -> (Token, &[Token]) {
     if tokens.is_empty() {
@@ -261,6 +448,15 @@ pub fn pop_token(tokens: &[Token]) -> (Token, &[Token]) {
 
 #[cfg(test)]
 mod test {
+    // ============  ============   ==========   ============
+    // ============  ============  ============  ============
+    //      ==       ==            ==        ==       ==
+    //      ==       ============   ======            ==
+    //      ==       ============       ======        ==
+    //      ==       ==            ==        ==       ==
+    //      ==       ============  ============       ==
+    //      ==       ============   ==========        ==
+
     use crate::ast::token::make_token_list;
     use crate::ast::token::Token;
 
