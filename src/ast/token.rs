@@ -339,39 +339,33 @@ fn tokenize_operator(chars: &mut Peekable<Chars>) -> Result<Token, String> {
                 Some('=') => tokenize_const_token(chars, Token::GreaterThanEqual),
                 _ => Ok(Token::GreaterThan),
             },
-            '?' => {
-                chars.next();
-                match chars.peek() {
-                    Some('?') => {
-                        chars.next();
-                        match chars.peek() {
-                            Some('=') => tokenize_const_token(chars, Token::QuestionQuestionAssign),
-                            _ => Ok(Token::QuestionQuestion),
-                        }
+            '?' => match chars.peek() {
+                Some('?') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('=') => tokenize_const_token(chars, Token::QuestionQuestionAssign),
+                        _ => Ok(Token::QuestionQuestion),
                     }
-                    Some('.') => tokenize_const_token(chars, Token::QuestionDot),
-                    _ => Ok(Token::Question),
                 }
-            }
+                Some('.') => tokenize_const_token(chars, Token::QuestionDot),
+                _ => Ok(Token::Question),
+            },
             '(' => Ok(Token::ParenStart),
             ')' => Ok(Token::ParenEnd),
             '[' => Ok(Token::BracketStart),
             ']' => Ok(Token::BracketEnd),
             '{' => Ok(Token::BraceStart),
             '}' => Ok(Token::BraceEnd),
-            '.' => {
-                chars.next();
-                match chars.peek() {
-                    Some('.') => {
-                        chars.next();
-                        match chars.peek() {
-                            Some('.') => tokenize_const_token(chars, Token::SpreadDots),
-                            _ => Ok(Token::Dot),
-                        }
+            '.' => match chars.peek() {
+                Some('.') => {
+                    chars.next();
+                    match chars.peek() {
+                        Some('.') => tokenize_const_token(chars, Token::SpreadDots),
+                        _ => Ok(Token::Dot),
                     }
-                    _ => Ok(Token::Dot),
                 }
-            }
+                _ => Ok(Token::Dot),
+            },
             ',' => Ok(Token::Comma),
             ':' => Ok(Token::Colon),
             ';' => Ok(Token::Semicolon),
@@ -461,60 +455,150 @@ mod test {
     use crate::ast::token::Token;
 
     #[test]
-    fn tokenize_decimal_numbers_and_operators() {
-        let test_case = "1 + 2 * 4 - 6 / 3";
+    fn test_tokenize_decimal_numbers() {
+        let test_case =
+            "1 2 3 4 5 6 7 8 9 10 20 50 100 5000 9999 999999999999999999999999999999999999999999";
 
         let result = make_token_list(test_case).unwrap();
         let expected = vec![
             Token::Number("1".to_string()),
-            Token::Plus,
             Token::Number("2".to_string()),
-            Token::Multiple,
+            Token::Number("3".to_string()),
             Token::Number("4".to_string()),
-            Token::Minus,
+            Token::Number("5".to_string()),
             Token::Number("6".to_string()),
-            Token::Divide,
-            Token::Number("3".to_string()),
-        ];
-
-        assert_eq!(result, expected, r#"tokenize "1 + 2 * 4 - 6 / 3""#);
-    }
-
-    #[test]
-    fn tokenize_decimal_number_greater_than_2_digits() {
-        let test_case = "10 * 25 - 306";
-
-        let result = make_token_list(test_case).unwrap();
-        let expected = vec![
+            Token::Number("7".to_string()),
+            Token::Number("8".to_string()),
+            Token::Number("9".to_string()),
             Token::Number("10".to_string()),
-            Token::Multiple,
-            Token::Number("25".to_string()),
-            Token::Minus,
-            Token::Number("306".to_string()),
+            Token::Number("20".to_string()),
+            Token::Number("50".to_string()),
+            Token::Number("100".to_string()),
+            Token::Number("5000".to_string()),
+            Token::Number("9999".to_string()),
+            Token::Number("999999999999999999999999999999999999999999".to_string()),
         ];
 
-        assert_eq!(result, expected, r#"tokenize "10 * 25 * 306""#);
+        assert_eq!(result, expected, r#"tokenize numbers"#);
     }
 
     #[test]
-    fn tokenize_number_and_operator_with_parens() {
-        let test_case = "((30) / (2 + 3))";
-
-        let result = make_token_list(test_case).unwrap();
-        let expected = vec![
-            Token::ParenStart,
-            Token::ParenStart,
-            Token::Number("30".to_string()),
-            Token::ParenEnd,
-            Token::Divide,
-            Token::ParenStart,
-            Token::Number("2".to_string()),
-            Token::Plus,
-            Token::Number("3".to_string()),
-            Token::ParenEnd,
-            Token::ParenEnd,
+    fn test_tokenize_operators() {
+        let test_cases = vec![
+            ("=", Token::Assign),
+            ("+", Token::Plus),
+            ("-", Token::Minus),
+            ("*", Token::Multiple),
+            ("**", Token::Exponent),
+            ("/", Token::Divide),
+            ("%", Token::Remainder),
+            ("+=", Token::PlusAssign),
+            ("-=", Token::MinusAssign),
+            ("*=", Token::MultipleAssign),
+            ("**=", Token::ExponentAssign),
+            ("/=", Token::DivideAssign),
+            ("%=", Token::RemainderAssign),
+            ("++", Token::PlusPlus),
+            ("--", Token::MinusMinus),
+            ("~", Token::BitNot),
+            ("|", Token::BitOr),
+            ("&", Token::BitAnd),
+            ("^", Token::BitXor),
+            ("|=", Token::BitOrAssign),
+            ("&=", Token::BitAndAssign),
+            ("^=", Token::BitXorAssign),
+            ("<<", Token::LeftShift),
+            (">>", Token::RightShift),
+            (">>>", Token::UnsignedRightShift),
+            ("<<=", Token::LeftShiftAssign),
+            (">>=", Token::RightShiftAssign),
+            (">>>=", Token::UnsignedRightShiftAssign),
+            ("==", Token::Equal),
+            ("!=", Token::NotEqual),
+            ("===", Token::StrictEqual),
+            ("!==", Token::StrictNotEqual),
+            (">", Token::GreaterThan),
+            (">=", Token::GreaterThanEqual),
+            ("<", Token::LessThan),
+            ("<=", Token::LessThanEqual),
+            ("||", Token::Or),
+            ("&&", Token::And),
+            ("!", Token::Not),
+            ("||=", Token::OrAssign),
+            ("&&=", Token::AndAssign),
+            ("?", Token::Question),
+            ("??", Token::QuestionQuestion),
+            ("??=", Token::QuestionQuestionAssign),
+            ("?.", Token::QuestionDot),
+            ("(", Token::ParenStart),
+            (")", Token::ParenEnd),
+            ("[", Token::BracketStart),
+            ("]", Token::BracketEnd),
+            ("{", Token::BraceStart),
+            ("}", Token::BraceEnd),
+            (".", Token::Dot),
+            (",", Token::Comma),
+            (":", Token::Colon),
+            (";", Token::Semicolon),
+            ("...", Token::SpreadDots),
+            ("=>", Token::Arrow),
         ];
 
-        assert_eq!(result, expected, r#"tokenize "10 * 25 * 306""#);
+        for (test_case, expected) in test_cases {
+            let result = make_token_list(test_case);
+            assert_eq!(result, Ok(vec![expected]), r#"tokenize {}"#, test_case);
+        }
+    }
+
+    #[test]
+    fn test_tokenize_string() {
+        let test_cases = vec![
+            ("'foo'", Token::Arrow),
+            (r#""bar""#, Token::Arrow),
+            ("`baz`", Token::Arrow),
+            (r#"'aaa bbb "\'\" !?=+=))'"#, Token::Arrow),
+            (r#""aaa bbb '\'\" !?=+=))""#, Token::Arrow),
+            (r#"`aaa bbb '\'\" !?=+=))`"#, Token::Arrow),
+            (
+                r#" // foo bar
+            "#,
+                Token::Arrow,
+            ),
+            (r#"/* foo bar baz */"#, Token::Arrow),
+        ];
+
+        for (test_case, expected) in test_cases {
+            let result = make_token_list(test_case);
+            assert_eq!(result, Ok(vec![expected]), r#"tokenize {}"#, test_case);
+        }
+    }
+
+    #[test]
+    fn test_tokenize_template_literal() {
+        let test_case = r#"`aaa ${2 + 3} bbb ${`d ${`ff ${5 - 4}`} e`} ccc`"#;
+        let expected = vec![Token::Arrow];
+
+        let result = make_token_list(test_case);
+        assert_eq!(result, Ok(expected), r#"tokenize {}"#, test_case);
+    }
+
+    #[test]
+    fn tokenize_number_and_operator_with_no_spaces() {
+        let test_case = "3+2+=+5**++6";
+
+        let result = make_token_list(test_case);
+        let expected = vec![
+            Token::Number("3".to_string()),
+            Token::Plus,
+            Token::Number("2".to_string()),
+            Token::PlusAssign,
+            Token::Plus,
+            Token::Number("5".to_string()),
+            Token::Exponent,
+            Token::PlusPlus,
+            Token::Number("6".to_string()),
+        ];
+
+        assert_eq!(result, Ok(expected), r#"tokenize 3+2+=+5**++6"#);
     }
 }
