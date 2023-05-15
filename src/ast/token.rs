@@ -189,10 +189,10 @@ pub enum Token {
     BackQuoteTemplateLiteral,
 
     // //
-    LineComment,
+    LineComment(String),
 
     // /* */
-    BlockComment,
+    BlockComment(String),
 
     //
     Eof,
@@ -396,22 +396,44 @@ fn tokenize_decimal_number(chars: &mut Peekable<Chars>) -> Result<Token, String>
 }
 
 fn tokenize_line_comment(chars: &mut Peekable<Chars>) -> Result<Token, String> {
-    let mut str = String::new();
-
-    todo!();
-
-    Ok(Token::LineComment)
+    chars.next();
+    let str = chars.take_while(|c| c != &'\n').collect();
+    Ok(Token::LineComment(str))
 }
 
 fn tokenize_block_comment(chars: &mut Peekable<Chars>) -> Result<Token, String> {
-    let mut str = String::new();
+    let mut str = "/".to_string();
 
-    todo!();
+    let mut is_prev_asterisk = false;
+    while let Some(c) = chars.next() {
+        str.push(c);
 
-    Ok(Token::BlockComment)
+        if is_prev_asterisk && c == '/' {
+            break;
+        } else if c == '*' {
+            is_prev_asterisk = true;
+        } else {
+            is_prev_asterisk = false;
+        }
+    }
+
+    Ok(Token::BlockComment(str))
 }
 
 fn tokenize_single_quote_string_literal(chars: &mut Peekable<Chars>) -> Result<Token, String> {
+    let mut str = String::new();
+
+    while let Some(c) = chars.next() {
+        str.push(c);
+
+        if c == '\\' {
+            if let Some(c) = chars.next() {}
+        }
+        if c == '\'' {
+            break;
+        }
+    }
+
     todo!();
 }
 
