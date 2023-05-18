@@ -53,4 +53,8 @@ macro_rules! character_patterns {
     (Punctuator right brace) => {
         '}'
     };
+
+    (Numeric) => {
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+    };
 }

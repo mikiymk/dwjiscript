@@ -13,10 +13,6 @@ fn main() {
     let ast = parse_script(reader);
 
     println!("{:?}", ast);
-
-    let ast = ast::make_ast(&source);
-
-    println!("{:?}", ast);
 }
 
 fn read_line() -> Option<String> {
