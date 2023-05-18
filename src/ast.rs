@@ -1,4 +1,8 @@
+pub mod script;
+
 pub mod token;
+
+
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Ast {

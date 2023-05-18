@@ -1,6 +1,6 @@
 use crate::to_source_string::ToSourceString;
 
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum Punctuator {
     /// {
     LeftBrace,

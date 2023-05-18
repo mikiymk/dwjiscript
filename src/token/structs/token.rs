@@ -1,40 +1,70 @@
 //! プログラムの文字列からトークン列にするモジュールです。
 
 use super::comment::Comment;
+use super::literal::Literal;
 use super::punctuator::Punctuator;
 use crate::to_source_string::ToSourceString;
 
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TokenList {
     tokens: Vec<Token>,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone)]
-pub enum Token {
-    WhiteSpace,
-    LineTerminator,
-    Comment(Comment),
-    Identifier(String),
-    Punctuator(Punctuator),
-    Literal,
-    Template,
-}
+impl TokenList {
+    pub fn new(tokens: Vec<Token>) -> Self {
+        TokenList { tokens }
+    }
 
-impl Token {
-    pub fn new_whitespace() -> Token {
-        Token::WhiteSpace
+    pub fn append(&mut self, token: Token) {
+        self.tokens.push(token);
     }
 }
 
-impl ToSourceString for Token {
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub struct Token {
+    token_type: TokenType,
+    token_start_index: usize,
+    token_end_index: usize,
+}
+
+impl Token {
+    pub fn new(token_type: &TokenType, start_position: usize, end_position: usize) -> Token {
+        Token {
+            token_type: *token_type,
+            token_start_index: start_position,
+            token_end_index: end_position,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub enum TokenType {
+    /// https://tc39.es/ecma262/#sec-white-space
+    WhiteSpace,
+    LineTerminator,
+    Comment(Comment),
+    Identifier,
+    Punctuator(Punctuator),
+    Literal(Literal),
+    Template,
+}
+
+impl TokenType {
+    pub fn new_whitespace() -> TokenType {
+        TokenType::WhiteSpace
+    }
+}
+
+impl ToSourceString for TokenType {
     fn to_source_string(&self) -> String {
         match self {
             Self::WhiteSpace => " ".to_string(),
-            Token::LineTerminator => "\n".to_string(),
-            Token::Comment(c) => c.to_source_string(),
-            Token::Identifier(_) => todo!(),
-            Token::Punctuator(_) => todo!(),
-            Token::Literal => todo!(),
-            Token::Template => todo!(),
+            TokenType::LineTerminator => "\n".to_string(),
+            TokenType::Comment(c) => todo!(),
+            TokenType::Identifier => todo!(),
+            TokenType::Punctuator(_) => todo!(),
+            TokenType::Literal(_) => todo!(),
+            TokenType::Template => todo!(),
         }
     }
 }
