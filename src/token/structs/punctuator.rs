@@ -35,13 +35,13 @@ pub enum Punctuator {
     /// <
     LessThan,
 
-    /// >
+    /// \>
     GreaterThan,
 
     /// <=
     LessThanEqual,
 
-    /// >=
+    /// \>=
     GreaterThanEqual,
 
     /// ==
@@ -83,10 +83,10 @@ pub enum Punctuator {
     /// <<
     LeftShift,
 
-    /// >>
+    /// \>>
     RightShift,
 
-    /// >>>
+    /// \>>>
     UnsignedRightShift,
 
     /// &
@@ -143,10 +143,10 @@ pub enum Punctuator {
     /// <<=
     LeftShiftAssign,
 
-    /// >>=
+    /// \>>=
     RightShiftAssign,
 
-    /// >>>=
+    /// \>>>=
     UnsignedRightShiftAssign,
 
     /// &=
@@ -166,6 +166,9 @@ pub enum Punctuator {
 
     /// ??=
     NullishCoalesceAssign,
+
+    /// ?.
+    OptionalChain,
 
     /// =>
     Arrow,
@@ -229,6 +232,7 @@ impl ToSourceString for Punctuator {
             Punctuator::LogicalAndAssign => todo!(),
             Punctuator::LogicalOrAssign => todo!(),
             Punctuator::NullishCoalesceAssign => todo!(),
+            Punctuator::OptionalChain => todo!(),
             Punctuator::Arrow => todo!(),
         }
     }

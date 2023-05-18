@@ -1,4 +1,6 @@
-use crate::token::tokenize::tokenize;
+#![allow(dead_code, unused)]
+
+use crate::ast::{reader_struct::SourceCodeReader, script::parse_script};
 
 fn main() {
     println!("Hello, world!");
@@ -7,9 +9,10 @@ fn main() {
 
     println!("{:?}", source);
 
-    let token_list = tokenize(&source);
+    let reader = SourceCodeReader::new(&source);
+    let ast = parse_script(reader);
 
-    println!("{:?}", token_list);
+    println!("{:?}", ast);
 
     let ast = ast::make_ast(&source);
 
@@ -27,4 +30,5 @@ mod token {
     pub mod structs;
     pub mod tokenize;
 }
+mod pattern_macros;
 mod to_source_string;

@@ -28,9 +28,21 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(token_type: &TokenType, start_position: usize, end_position: usize) -> Token {
+    pub fn try_new(
+        token_type: Option<TokenType>,
+        start_position: Option<usize>,
+        end_position: Option<usize>,
+    ) -> Option<Token> {
+        let token_type = token_type?;
+        let start_position = start_position?;
+        let end_position = end_position?;
+
+        Some(Token::new(token_type, start_position, end_position))
+    }
+
+    pub fn new(token_type: TokenType, start_position: usize, end_position: usize) -> Token {
         Token {
-            token_type: *token_type,
+            token_type: token_type,
             token_start_index: start_position,
             token_end_index: end_position,
         }
