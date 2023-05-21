@@ -3,9 +3,16 @@ use crate::to_source_string::ToSourceString;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum Literal {
     /// 123
+    DecimalInteger,
+
     /// 12.3
+    DecimalPointNumber,
+
     /// 12e3
-    DecimalNumber,
+    DecimalExponentNumber,
+
+    /// 12.3e4
+    DecimalPointExponentNumber,
 
     /// 123n
     DecimalBigInteger,
@@ -41,7 +48,10 @@ pub enum Literal {
 impl ToSourceString for Literal {
     fn to_source_string(&self) -> String {
         match self {
-            Literal::DecimalNumber => todo!(),
+            Literal::DecimalInteger => todo!(),
+            Literal::DecimalPointNumber => todo!(),
+            Literal::DecimalExponentNumber => todo!(),
+            Literal::DecimalPointExponentNumber => todo!(),
             Literal::DecimalBigInteger => todo!(),
             Literal::BinaryInteger => todo!(),
             Literal::OctalInteger => todo!(),
