@@ -1,5 +1,20 @@
 # Dwjiscript
 
+目次
+
+1. [プログラム言語 dwjiscript](./1-0.md)
+   1. [dwjiscript について](./1-1.md)
+   2. [用語の定義](./1-2.md)
+   3. [構文](./1-3.md)
+   5. [トランスパイル](./1-4.md)
+   6. [javascript ・ typescript の読み込み](./1-5.md)
+2. [開発用ツール dwji](./2-0.md)
+   1. [format サブコマンド](./2-1.md)
+   2. [lint サブコマンド](./2-2.md)
+   3. [build サブコマンド](./2-3.md)
+   4. [test サブコマンド](./2-4.md)
+   6. [設定](./2-5.md)
+
 ## 1. はじめに
 
 `Dwjiscript` は静的型付けで `Javascript` 、 `Typescript` と相互に呼び出せるように設計されたトランスパイル言語です。
