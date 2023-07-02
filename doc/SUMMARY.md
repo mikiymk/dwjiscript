@@ -1,15 +1,15 @@
 # Summary
 
 - [はじめに](README.md)
-- [このドキュメントについて]()
+- [このドキュメントについて](about-document.md)
 
 # プログラム言語 dwjiscript
 
-- [dwjiscript について]()
-- [用語の定義]()
-- [javascript の構文]()
-- [typescript の構文]()
-- [dwjiscript の構文]()
+- [dwjiscript について](dwjiscript/about.md)
+- [用語の定義](dwjiscript/terms.md)
+- [javascript の構文](dwjiscript/syntax/js/javascript.md)
+- [typescript の構文](dwjiscript/syntax/ts/typescript.md)
+- [dwjiscript の構文](dwjiscript/syntax/ds/dwjiscript.md)
 - [リテラル]()
 - 演算子
 - 式
