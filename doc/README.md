@@ -1,0 +1,1 @@
+# Dwjiscript と dwji のドキュメント
