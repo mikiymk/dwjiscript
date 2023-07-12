@@ -8,7 +8,7 @@
 - [dwjiscript について](dwjiscript/about.md)
 - [用語の定義](dwjiscript/terms.md)
 - [JavaScript の構文](dwjiscript/syntax/js/javascript.md)
-  - [JavaScript のリテラル]()
+  - [JavaScript のリテラル](dwjiscript/syntax/js/literal.md)
   - [JavaScript の演算子]()
   - [JavaScript の宣言]()
   - [JavaScript の条件分岐]()
