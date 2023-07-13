@@ -1,6 +1,13 @@
 # JavaScript のリテラルの構文
 
 ## null リテラル
+
+null リテラルは値の `null` を表します。
+
+```ebnf
+null_literal = "null";
+```
+
 ## 真偽値リテラル
 ## 数値リテラル
 ## 文字列リテラル
