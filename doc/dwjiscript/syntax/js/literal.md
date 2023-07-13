@@ -1,4 +1,4 @@
-# JavaScript のリテラルの構文
+# JavaScript のリテラル
 
 ## null リテラル
 
